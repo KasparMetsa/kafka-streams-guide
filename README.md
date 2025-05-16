@@ -20,9 +20,8 @@ docker-compose up -d
     - Zookeeper on port 2181
     - Kafka on port 9093
 
-### 2. Create Kafka Topics
 
-#### c. List all topics to verify
+### 2. List all topics to verify
 
 ```shell
 docker exec -it kafka-streams-kaspar-kafka-1 \
