@@ -20,7 +20,7 @@ public class WordCountApp {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         StreamsBuilder streamsBuilder = new StreamsBuilder();
-        KStream<String, String> textLines = streamsBuilder.stream("streams-plaintext-input");
+        KStream<String, String> textLines = streamsBuilder.stream("streams-wordcount-input");
 
         KTable<String, Long> wordCounts = textLines
                 .flatMapValues(line -> Arrays.asList(line.toLowerCase().split("\\W+")))
