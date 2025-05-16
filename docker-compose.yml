@@ -50,6 +50,8 @@ services:
       echo 'Creating topics...' &&
       kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic streams-wordcount-input &&
       kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic streams-wordcount-output &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic streams-windowed-wordcount-input &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic streams-windowed-wordcount-output &&
       echo 'Topics created.'
       "
     restart: on-failure

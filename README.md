@@ -7,7 +7,7 @@ This project demonstrates a basic Kafka Streams application that performs a word
 - Docker and Docker Compose installed
 - Java 11+ and Maven (to build and run `WordCountApp.java`)
 
-## Getting Started
+## WordCountApp
 
 ### 1. Start Kafka and Zookeeper
 
@@ -78,4 +78,23 @@ cool    1
 process 1
 data    1
 fast    1
+```
+
+## WordCountWindowedApp
+```shell
+docker exec -it kafka-streams-kaspar-kafka-1 \                                                                                                                                               7s
+  kafka-console-producer \
+    --broker-list localhost:9093 \
+    --topic streams-windowed-wordcount-input
+```
+
+```shell
+docker exec -it kafka-streams-kaspar-kafka-1 \
+  kafka-console-consumer \
+    --bootstrap-server localhost:9093 \
+    --topic streams-windowed-wordcount-output \
+    --from-beginning \
+    --formatter kafka.tools.DefaultMessageFormatter \
+    --property print.key=true \
+    --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
 ```
