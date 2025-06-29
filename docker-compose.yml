@@ -21,8 +21,13 @@ services:
       - zookeeper
     ports:
       - "9093:9094"
+      - "9101:9101"
+      - "7071:7071"
+    volumes:
+      - ./kafka-jmx-exporter.yml:/opt/jmx_exporter/config.yml
+      - ./jmx_prometheus_javaagent-0.20.0.jar:/opt/jmx_exporter/jmx_prometheus_javaagent.jar
     environment:
-      KAFKA_BROKER_ID: 1
+      KAFKA_BROKER_ID: 999
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
@@ -30,8 +35,11 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_OPTS: "-javaagent:/opt/jmx_exporter/jmx_prometheus_javaagent.jar=7071:/opt/jmx_exporter/config.yml"
     healthcheck:
-      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9093", "--list"]
+      test: ["CMD-SHELL", "nc -z localhost 9093"]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -49,9 +57,25 @@ services:
       "
       echo 'Creating topics...' &&
       kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic streams-wordcount-input &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic parallel-topic1 &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic parallel-topic2 &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic processed-users-topic &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic processed-orders-topic &&
       kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic streams-wordcount-output &&
       kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic streams-windowed-wordcount-input &&
       kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic streams-windowed-wordcount-output &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1 --topic sink-conversion-output &&
       echo 'Topics created.'
       "
     restart: on-failure
+  redpanda-console:
+    image: docker.redpanda.com/redpandadata/console:latest
+    networks:
+      - kafka_net
+    ports:
+      - "8888:8080"
+    environment:
+      KAFKA_BROKERS: kafka:9093
+      CONSOLE_BROKERS: kafka:9093
+    depends_on:
+      - kafka

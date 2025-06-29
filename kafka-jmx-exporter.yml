@@ -1,0 +1,18 @@
+startDelaySeconds: 0
+username: ""
+password: ""
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+ssl: false
+rules:
+  # Existing Kafka server metrics
+  - pattern: "kafka.server<type=(.+), name=(.+)><>(Count|Value)"
+    name: kafka_server_$1_$2
+    type: GAUGE
+    attrNameSnakeCase: true
+    help: "Kafka server $1 $2"
+
+  - pattern: 'kafka.producer<type=producer-(.+-)?metrics, .*>'
+    type: GAUGE
+  - pattern: 'kafka.streams<type=stream-(.+-)?metrics, .*>'
+    type: GAUGE
